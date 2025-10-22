@@ -1,19 +1,14 @@
-import { Container, Typography, Box, Button } from '@mui/material'
+import { Outlet } from 'react-router-dom'
+import Navbar from './components/Navbar'
 
 export default function App() {
   return (
-    <Container>
-      <Box textAlign="center" mt={10}>
-        <Typography variant="h3" color="primary">
-          🚀 MUI is working!
-        </Typography>
-        <Button variant="contained" color="secondary" sx={{ mt: 4 }}>
-          Test Button
-        </Button>
-      </Box>
-    </Container>
+    <>
+      {/* Navbar visible on all pages */}
+      <Navbar />
+
+      {/* Outlet renders the current route Home  */}
+      <Outlet />
+    </>
   )
 }
-
-
-

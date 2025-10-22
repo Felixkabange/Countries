@@ -12,7 +12,15 @@ export default function Home() {
 
   useEffect(() => {
     fetchAllCountries()
-      .then(data => setCountries(data))
+      .then(data => {
+        // Sort countries alphabetically by name
+        const sorted = data.sort((a, b) => {
+          const nameA = a.name.common.toUpperCase()
+          const nameB = b.name.common.toUpperCase()
+          return nameA.localeCompare(nameB)
+        })
+        setCountries(sorted)
+      })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
