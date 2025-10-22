@@ -1,29 +1,53 @@
 import { Grid, Container, Box, Typography, Fade } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import CountryCard from '../components/CountryCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
-import { fetchAllCountries } from '../api/countriesApi'
+import {
+  fetchAllCountries,
+  fetchCountriesByRegion,
+  fetchCountryByName
+} from '../api/countriesApi'
 
 export default function Home() {
   const [countries, setCountries] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const [searchParams] = useSearchParams()
+  const nameQuery = searchParams.get('name') || ''
+  const regionQuery = searchParams.get('region') || ''
+
   useEffect(() => {
-    fetchAllCountries()
-      .then(data => {
-        // Sort countries alphabetically by name
-        const sorted = data.sort((a, b) => {
-          const nameA = a.name.common.toUpperCase()
-          const nameB = b.name.common.toUpperCase()
-          return nameA.localeCompare(nameB)
-        })
+    setLoading(true)
+    setError(null)
+
+    const fetchData = async () => {
+      try {
+        let data = []
+        if (nameQuery) {
+          data = await fetchCountryByName(nameQuery)
+        } else if (regionQuery) {
+          data = await fetchCountriesByRegion(regionQuery)
+        } else {
+          data = await fetchAllCountries()
+        }
+
+        // Sort countries alphabetically by common name
+        const sorted = data.sort((a, b) =>
+          a.name.common.localeCompare(b.name.common)
+        )
         setCountries(sorted)
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [nameQuery, regionQuery])
 
   if (loading) return <LoadingSpinner />
   if (error) return <ErrorMessage message={error} />
@@ -67,7 +91,11 @@ export default function Home() {
         <Grid container spacing={3}>
           {countries.map((country, index) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={country.cca3}>
-              <Fade in timeout={800} style={{ transitionDelay: `${Math.min(index * 50, 1000)}ms` }}>
+              <Fade
+                in
+                timeout={800}
+                style={{ transitionDelay: `${Math.min(index * 50, 1000)}ms` }}
+              >
                 <Box
                   sx={{
                     transition: 'transform 0.3s ease',

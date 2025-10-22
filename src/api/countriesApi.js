@@ -38,3 +38,14 @@ export const fetchIndependentCountries = async () => {
   if (!res.ok) throw new Error('Failed to fetch independent countries')
   return res.json()
 }
+
+// Fetch countries by name (search)
+export const fetchCountryByName = async (name) => {
+  const fields = ['name','flags','population','region','capital','cca3'].join(',')
+  const res = await fetch(`${BASE_URL}/name/${name}?fields=${fields}`)
+  if (!res.ok) {
+    if (res.status === 404) return [] // no match found, return empty array
+    throw new Error('Failed to fetch country by name')
+  }
+  return res.json()
+}
